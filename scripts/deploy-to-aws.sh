@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-HOST="ec2-user@13.201.227.53"
+HOST="ec2-user@13.126.236.26"
 KEY="C:/Users/janan/projects/demo-cicd-app/demo-key.pem"
 IMAGE="yogasrisiva/demo-cicd-app:latest"
 
