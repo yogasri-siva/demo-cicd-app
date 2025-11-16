@@ -1,10 +1,22 @@
 #!/usr/bin/env bash
 set -e
 
-echo "=== Deploying to AWS (placeholder) ==="
-echo "Here we will:"
-echo "  - Pull Docker image from registry"
-echo "  - Update ECS service / EC2 instance / Elastic Beanstalk"
-echo "  - Or run docker on EC2 with the new image"
+HOST="ec2-user@13.201.227.53"
+KEY="C:/Users/janan/projects/demo-cicd-app/demo-key.pem"
+IMAGE="yogasrisiva/demo-cicd-app:latest"
 
-# TODO: implement actual AWS deployment in Step 2.
+echo "=== Starting Deployment to EC2 ==="
+
+ssh -o StrictHostKeyChecking=no -i "$KEY" $HOST << EOF
+echo "Pulling latest Docker image..."
+docker pull $IMAGE
+
+echo "Stopping old container..."
+docker stop demo-cicd-app || true
+docker rm demo-cicd-app || true
+
+echo "Starting new container on port 8081..."
+docker run -d -p 8081:8081 --name demo-cicd-app $IMAGE
+
+echo "Deployment complete!"
+EOF

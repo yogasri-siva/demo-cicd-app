@@ -1,39 +1,54 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_IMAGE = "yogasrisiva/demo-cicd-app"
+    }
+
+    options {
+        timeout(time: 30, unit: 'MINUTES')
+    }
+
     stages {
+
         stage('Checkout') {
             steps {
-                // Pull code from Git (Jenkins will use job's SCM config)
                 checkout scm
             }
         }
 
         stage('Build with Maven') {
             steps {
-                // If Jenkins agent is Linux; if Windows agent, we’ll switch to 'bat' later
-                bat 'mvn clean package -DskipTests'
+                bat 'mvn -B clean package -DskipTests'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                bat '''
-                docker build -t yogasrisiva/demo-cicd-app:latest .
-                '''
+                bat """
+                docker build -t %DOCKER_IMAGE%:latest .
+                """
             }
         }
 
         stage('Push Docker Image') {
             steps {
-                bat '''
-                docker push yogasrisiva/demo-cicd-app:latest
-                '''
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    bat """
+                    echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
+                    docker push %DOCKER_IMAGE%:latest
+                    """
+                }
             }
         }
 
         stage('Deploy to AWS') {
             steps {
+                // run bash script from Windows Jenkins
                 bat 'bash scripts/deploy-to-aws.sh'
             }
         }
