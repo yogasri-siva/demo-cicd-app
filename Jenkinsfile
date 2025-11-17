@@ -46,11 +46,8 @@ pipeline {
 
         stage('Deploy to AWS') {
             steps {
-                sshagent(credentials: ['aws-ec2-key']) {
-                    bat '''
-                    ssh -o StrictHostKeyChecking=no ec2-user@13.126.236.26 "docker pull yogasrisiva/demo-cicd-app:latest && docker stop demo-cicd-app || true && docker rm demo-cicd-app || true && docker run -d -p 80:8081 --name demo-cicd-app yogasrisiva/demo-cicd-app:latest"
-                    '''
-                }
+                echo 'HELLO FROM DEPLOY STAGE'
+                bat 'echo DEPLOY BLOCK IS RUNNING'
             }
         }
     }
